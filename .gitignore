@@ -1,0 +1,7 @@
+.flatpak-builder
+.DS_Store
+._.DS_Store
+*.css
+*.theme
+*.gresource
+temp

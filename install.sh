@@ -9,8 +9,10 @@ DEST_DIR=
 # Destination directory
 if [ "$UID" -eq "$ROOT_UID" ]; then
   DEST_DIR="/usr/share/themes"
+  FLATPAK_DIR="/var/lib/flatpak"
 else
   DEST_DIR="$HOME/.themes"
+  FLATPAK_DIR="$HOME/.var"
 fi
 
 THEME_NAME=Mojave
@@ -80,6 +82,7 @@ install() {
   [[ "${color}" == '-dark' ]] && local ELSE_DARK="${color}"
 
   local THEME_DIR="${1}/${2}${3}${4}${5}${6}${7}"
+  local THEME_NAME="${2}${3}${4}${5}${6}${7}"
 
   [[ -d "${THEME_DIR}" ]] && rm -rf "${THEME_DIR}"
 
@@ -149,9 +152,43 @@ install() {
   fi
 
   glib-compile-resources --sourcedir="${THEME_DIR}/gtk-3.0" --target="${THEME_DIR}/gtk-3.0/gtk.gresource" "${SRC_DIR}/main/gtk-3.0/gtk.gresource.xml"
+  echo '@import url("resource:///org/gnome/theme/gtk.css");' >>                             "${THEME_DIR}/gtk-3.0/gtk.css"
+  echo '@import url("resource:///org/gnome/theme/gtk-dark.css");' >>                        "${THEME_DIR}/gtk-3.0/gtk-dark.css"
+
+  # echo "${THEME_DIR}/gtk-3.0"
+  # echo "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.gresource"
+  # echo "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.css"
+  # echo "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk-dark.css"
+
+  glib-compile-resources --sourcedir="${THEME_DIR}/gtk-3.0" --target="${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.gresource" "${SRC_DIR}/main/gtk-3.0/gtk.gresource.xml"
+  echo '@import url("resource:///org/gnome/theme/gtk.css");' >>                             "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.css"
+  echo '@import url("resource:///org/gnome/theme/gtk-dark.css");' >>                        "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk-dark.css"
+  cp -r "${THEME_DIR}/index.theme"                                                          "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/index.theme"
+
+  # echo "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.css"
+
+  # echo "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/org.gtk.Gtk3theme.${THEME_NAME}.json"
+  # echo "mkdir -p ${FLATPAK_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}"
+  mkdir -p "/run/build/${THEME_NAME}"
+  cp "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.css"                          "/run/build/${THEME_NAME}/gtk.css"
+  cp "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk-dark.css"                     "/run/build/${THEME_NAME}/gtk-dark.css"
+  cp "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/gtk.gresource"                    "/run/build/${THEME_NAME}/gtk.gresource"
+  cp "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/index.theme"                      "/run/build/${THEME_NAME}/index.theme"
+
+  cd "${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}"
+  if [[ "$UID" -eq "$ROOT_UID" ]]; then
+    flatpak-builder -v --system --install --force-clean --delete-build-dirs --extra-sources="${pwd}" temp ${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/org.gtk.Gtk3theme.${THEME_NAME}.json
+  else
+    flatpak-builder -v --user --install --force-clean --delete-build-dirs --extra-sources="${pwd}" temp ${REPO_DIR}/flatpak/org.gtk.Gtk3theme.${THEME_NAME}/org.gtk.Gtk3theme.${THEME_NAME}.json
+  fi
+  cd -
+
   rm -rf "${THEME_DIR}/gtk-3.0/"{assets,windows-assets,gtk.css,gtk-dark.css}
-  echo '@import url("resource:///org/gnome/theme/gtk.css");' >>                              "${THEME_DIR}/gtk-3.0/gtk.css"
-  echo '@import url("resource:///org/gnome/theme/gtk-dark.css");' >>                         "${THEME_DIR}/gtk-3.0/gtk-dark.css"
+
+  # rm -rf "${FLATPAK_DIR}/runtime/org.gtk.Gtk3theme.${THEME_NAME}/gtk.css"
+  # rm -rf "${FLATPAK_DIR}/runtime/org.gtk.Gtk3theme.${THEME_NAME}/gtk-dark.css"
+  # rm -rf "${FLATPAK_DIR}/runtime/org.gtk.Gtk3theme.${THEME_NAME}/gtk.gresource"
+  # rm -rf "${FLATPAK_DIR}/runtime/org.gtk.Gtk3theme.${THEME_NAME}/index.theme"
 
   mkdir -p                                                                                   "${THEME_DIR}/metacity-1"
   cp -r "${SRC_DIR}/main/metacity-1/metacity-theme${color}.xml"                              "${THEME_DIR}/metacity-1/metacity-theme-1.xml"

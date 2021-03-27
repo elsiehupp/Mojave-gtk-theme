@@ -1,0 +1,54 @@
+{
+  "id": "org.gtk.Gtk3theme.Mojave-dark-alt",
+  "branch": "3.22",
+  "runtime": "org.freedesktop.Sdk",
+  "build-extension": true,
+  "sdk": "org.freedesktop.Sdk",
+  "runtime-version": "18.08",
+  "appstream-compose": false,
+  "separate-locales": false,
+  "modules": [
+    {
+      "name": "Mojave-dark-alt",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 gtk.css ${FLATPAK_DEST}/gtk.css",
+        "install -Dm644 gtk-dark.css ${FLATPAK_DEST}/gtk-dark.css",
+        "install -Dm644 gtk.gresource ${FLATPAK_DEST}/gtk.gresource",
+        "install -Dm644 index.theme ${FLATPAK_DEST}/index.theme"
+      ],
+      "sources": [
+        {
+          "file": "file",
+          "path": "gtk.css"
+        },
+        {
+          "file": "file",
+          "path": "gtk-dark.css"
+        },
+        {
+          "file": "file",
+          "path": "gtk.gresource"
+        },
+        {
+          "file": "file",
+          "path": "index.theme"
+        }
+      ]
+    },
+    {
+      "name": "appdata",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm644 --target-directory=${FLATPAK_DEST}/share/appdata org.gtk.Gtk3theme.Mojave-dark-alt.appdata.xml",
+        "appstream-compose --basename=org.gtk.Gtk3theme.Mojave-dark-alt --prefix=${FLATPAK_DEST} --origin=flatpak org.gtk.Gtk3theme.Mojave-dark-alt"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "path": "org.gtk.Gtk3theme.Mojave-dark-alt.appdata.xml"
+        }
+      ]
+    }
+  ]
+}
